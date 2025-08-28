@@ -98,7 +98,7 @@ export default function LoginPage() {
           <img
             src="/lawyer.png"
             alt="Logo"
-            className="w-36 h-28"
+            className="w-36 h-30"
           />
         </div>
       <div className="bg-white rounded-3xl shadow-lg w-full max-w-md overflow-hidden">
