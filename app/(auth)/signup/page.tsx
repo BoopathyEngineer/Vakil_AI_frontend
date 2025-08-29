@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, ChangeEvent, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import { getEmailOTP, signup, verifyEmailOTP } from "@/services/api";
+import { getEmailVerification, signup, verifyEmailOtp } from "@/services/api";
 import { useToast } from "@/app/components/toast/useToast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import API from "@/app/action/axios";

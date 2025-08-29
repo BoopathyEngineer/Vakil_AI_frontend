@@ -3,7 +3,7 @@
 import { useState, ChangeEvent, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/app/action/axios";
-import { getEmailVerification, verifyEmailOTP } from "@/services/api";
+import { getEmailVerification } from "@/services/api";
 import { useToast } from "@/app/components/toast/useToast";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 

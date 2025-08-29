@@ -1,8 +1,7 @@
-import { addUser } from "@/services/api";
+import { addUser, AddUserData } from "@/services/api";
 import { useState } from "react";
 import useAuthStore from "../store/authStore";
 import { useToast } from "./toast/useToast";
-import API from "../action/axios";
 
 const AddUserComponent = () => {
     const { role, university } = useAuthStore(); // Now properly typed
@@ -39,13 +38,13 @@ const AddUserComponent = () => {
                 notify("Please enter a valid email address.", "error");
                 return;
             }
-            const lowercasedFormData = {
+            const userData: AddUserData = {
                 ...formData,
                 email: formData.email.toLowerCase(),
-                university: formData.role === "Super Admin" ? "" : formData.university,
+                university: formData.role === "Super Admin" ? "" : formData.university || "",
             };
-            const response = await API.post('/create_user',lowercasedFormData)
-            if (response.status === 200) {
+            const response = await addUser(userData);
+            if (response.success) {
                 notify("User added successfully!", "success");
           
                 setFormData({

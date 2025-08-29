@@ -61,7 +61,7 @@ interface createUser {
   university: string;
 }
 
-interface addUser {
+export interface AddUserData {
   role: string;
   username: string;
   dob: string;
@@ -69,6 +69,18 @@ interface addUser {
   email: string;
   university: string;
 }
+
+export const addUser = async (data: AddUserData): Promise<ApiResponse> => {
+  const token = Cookies.get('authToken');
+  return fetchApi(`/admin/create_user`, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+};
 
 // Helper function for handling fetch requests
 const fetchApi = async (url: string, options?: RequestInit) => {
