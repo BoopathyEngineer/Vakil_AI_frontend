@@ -122,7 +122,6 @@ const SourcesGrid: React.FC<SourcesGridProps> = ({ sources }) => {
 interface ChatMessageProps {
   message: ResponseData;
   isLast: boolean;
-
   onSuggestionClick: (q: string) => void;
   loading: boolean;
   initialQueryLoading: boolean;
@@ -184,10 +183,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   type ImageItem = {
     source: string;
   };
-
-
-
-
 
   interface DOMNode {
     type: string;
@@ -253,10 +248,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </table>
     );
   };
-  
-
-
-
   
   return (
     <div className="mb-6 flex flex-col items-start w-full">
@@ -402,7 +393,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
           </>
         )}
-
 
         {selectedTab === 'Sources' && (
           <div className="mt-4">
@@ -566,8 +556,6 @@ const ChatPage = () => {
       }
     });
   };
-  
-
   
   const handleSuggestionClick = (question: string) => {
     setInput(question);
@@ -834,25 +822,15 @@ const ChatPage = () => {
     }
 
     const userQuery = input.trim();
+    let imageBase64 = null; // Initialize imageBase64 here
+    
     setInput("");
     setLoading(true);
     setError(null);
 
-    const userMessage: ResponseData = {
-      response_mode: "user",
-      question: userQuery || `Analyzing file: ${selectedFile?.name}`,
-      chat_id: chat_id,
-      user_id: parseInt(userId),
-      image_base64: imageBase64,
-    };
-    setMessages((prev) => [...prev, userMessage]);
-
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
-
+    // Process file first if there is one
     try {
       let documentText = null;
-      let imageBase64 = null;
       
       if (selectedFile) {
         const formData = new FormData();
@@ -864,7 +842,6 @@ const ChatPage = () => {
             Authorization: `Bearer ${authToken}`,
           },
           body: formData,
-          signal,
         });
         
         if (!uploadResponse.ok) {
@@ -873,9 +850,22 @@ const ChatPage = () => {
         
         const result = await uploadResponse.json();
         documentText = result.text;
-        imageBase64 = result.image_base64;
+        imageBase64 = result.image_base64; // Set imageBase64 from upload result
         clearSelectedFile();
       }
+
+      // Now create the user message with the imageBase64 if available
+      const userMessage: ResponseData = {
+        response_mode: "user",
+        question: userQuery || `Analyzing file: ${selectedFile?.name}`,
+        chat_id: chat_id,
+        user_id: parseInt(userId),
+        image_base64: imageBase64,
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/chat/response`, {
         method: "POST",
@@ -941,28 +931,16 @@ const ChatPage = () => {
 
   return (
     <div className="w-full bg-gray-50 text-black h-full flex flex-col justify-center items-center">
-      {/* Error Message */}
-      {/* {error &&
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4 w-[75%]">
-          {error}
-        </div>
-      } */}
-
       {/* Chat Messages */}
       <div
         className="flex-1 p-4 space-y-2 w-[75%]"
         style={{ overflowY: "auto", scrollbarWidth: "none" }}
       >
-        {/* {messages.length === 0 && !loading && !error &&
-          <div className="text-gray-500 text-center">No messages yet.</div>
-        } */}
-
         {messages.filter(m => m.response_mode === 'user' || m.answer).map((m, i) => (
           <ChatMessage
             key={m.resposne_id ?? i}
             message={m}
             isLast={i === messages.length - 1}
-
             onSuggestionClick={handleSuggestionClick}
             loading={loading}
             initialQueryLoading={initialQueryLoading}
@@ -1063,7 +1041,6 @@ const ChatPage = () => {
           </button>
         </form>
       </div>
-
     </div>
   );
 };

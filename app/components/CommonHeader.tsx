@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { CgProfile } from "react-icons/cg";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "../components/context/AuthContext";
 
 const Header = () => {
@@ -41,7 +41,7 @@ const Header = () => {
           className="cursor-pointer"
           onClick={() => setDropdownOpen(!isDropdownOpen)}
         >
-          <CgProfile className="w-10 h-10 cursor-pointer text-gray-700 bg-gray-200 rounded-full" />
+          <UserCircleIcon className="w-10 h-10 cursor-pointer text-gray-700 hover:text-[#8383F4] transition-colors duration-200" />
         </div>
 
         {isDropdownOpen && (

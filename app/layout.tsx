@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Hyperflx",
-  description: "Hyperflx",
+  title: "VakilAi",
+  description: "VakilAi",
   icons: {
     icon: '/lawyer.png'
   }
