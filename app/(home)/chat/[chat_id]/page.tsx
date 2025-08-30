@@ -1,5 +1,5 @@
 "use client";
- 
+
 import { useEffect, useState, useRef, useMemo, useLayoutEffect } from "react";
 import { useParams } from "next/navigation";
 import Cookies from "js-cookie";
@@ -10,7 +10,7 @@ import parse, { domToReact, Element as DomElement, DOMNode as CusDomNode } from 
 import { FiCopy } from 'react-icons/fi';
 import { useToast } from "@/app/components/toast/useToast";
 import { Element } from 'domhandler';
- 
+
 interface ResponseData {
   response_mode: string;
   question: string;
@@ -23,7 +23,7 @@ interface ResponseData {
   sources?: { Title: string; URL: string }[];
   image_base64?: string;
 }
- 
+
 // Interface for the chat history response (based on the example response)
 interface ChatHistoryResponse {
   chat_id: string;
@@ -41,29 +41,29 @@ interface ChatHistoryResponse {
     sources?: { Title: string; URL: string }[];
   }[];
 }
- 
+
 type Source = {
   Title: string;
   URL: string;
 };
- 
+
 interface SourcesGridProps {
   sources: Source[];
 }
- 
+
 type Video = {
   Title: string;
   URL: string;
 };
- 
+
 const SourcesGrid: React.FC<SourcesGridProps> = ({ sources }) => {
   const [showAll, setShowAll] = useState(false);
- 
+
   const visibleCount = 4;
   const initialSources = sources.slice(0, visibleCount);
   const remainingSources = sources.slice(visibleCount);
   const displayedSources = showAll ? sources : initialSources;
- 
+
   const getDomain = (url: string): string => {
     try {
       return new URL(url).hostname.replace("www.", "");
@@ -71,12 +71,12 @@ const SourcesGrid: React.FC<SourcesGridProps> = ({ sources }) => {
       return "source";
     }
   };
- 
+
   const getFavicon = (url: string): string => {
     const domain = getDomain(url);
     return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
   };
- 
+
   return (
     <div className="mt-4">
       {sources.length === 0 ? (
@@ -104,7 +104,7 @@ const SourcesGrid: React.FC<SourcesGridProps> = ({ sources }) => {
           ))}
         </div>
       )}
- 
+
       {remainingSources.length > 0 && (
         <div className="mt-4 text-center">
           <button
@@ -118,7 +118,7 @@ const SourcesGrid: React.FC<SourcesGridProps> = ({ sources }) => {
     </div>
   );
 };
- 
+
 interface ChatMessageProps {
   message: ResponseData;
   isLast: boolean;
@@ -126,13 +126,13 @@ interface ChatMessageProps {
   loading: boolean;
   initialQueryLoading: boolean;
 }
- 
+
 const Spinner = () => (
   <span className="ml-1 inline-block w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
 );
- 
+
 type TabKey = "Answer" | "Sources";
- 
+
 const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   isLast,
@@ -148,10 +148,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           {message.question}
           {message.image_base64 && (
             <div className="mt-2">
-              <img
-                src={`data:image/jpeg;base64,${message.image_base64}`}
+              <img 
+                src={`data:image/jpeg;base64,${message.image_base64}`} 
                 alt="Uploaded content"
-                className="max-w-full h-auto rounded-lg"
+                className="max-w-full h-auto rounded-lg" 
               />
             </div>
           )}
@@ -159,48 +159,48 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </div>
     );
   }
- 
+
   // Bot message tabs always shown for potential media, with spinner if loading
   const tabs: TabKey[] = ['Answer', 'Sources'];
- 
+
   const [selectedTab, setSelectedTab] = useState<TabKey>('Answer');
   const suggestions = message.suggestion_questions ?? [];
- 
+
   const isStreaming = isLast && (loading || initialQueryLoading);
- 
+
   const sourcesList = message.sources ?? [];
   const isSourcesLoading = isStreaming && message.sources === undefined;
   const isSourcesDisabled = !isSourcesLoading && sourcesList.length === 0;
    
   const [copied, setCopied] = useState<string | null>(null);
- 
+
   const handleCopy = async (text: string) => {
     await navigator.clipboard.writeText(text);
     setCopied(text);
     setTimeout(() => setCopied(null), 2000);
   };
- 
+
   type ImageItem = {
     source: string;
   };
- 
+
   interface DOMNode {
     type: string;
     name: string;
     children?: DOMNode[];
     data?: string;
   }
- 
+  
   function isElementNode(node: DOMNode): node is { type: 'tag'; name: string; children: DOMNode[] } {
     return node.type === 'tag';
   }
- 
+  
   const renderTable = (children: DOMNode[]) => {  
     const elementChildren = children.filter(isElementNode);
-     
+      
     const headers = elementChildren
       .filter(child => child.name === 'thead')
-      .flatMap(thead => {
+      .flatMap(thead => { 
         const thElements = (thead.children || [])
         .filter(child => child.type === 'tag' && child.name === 'tr')
         .flatMap(tr => {
@@ -211,7 +211,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         });
         return thElements;
       });
- 
+
     const rows = elementChildren.filter(child => child.name === 'tbody')
       .flatMap(tbody => Array.from(tbody.children || [])
         .filter(child => child.name === 'tr')
@@ -220,7 +220,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           .map(td => td.children?.[0]?.data?.trim())
         )
       );
-   
+    
     return (
       <table className="min-w-full table-auto my-4 border-collapse border border-gray-300">
         <thead>
@@ -248,7 +248,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       </table>
     );
   };
- 
+  
   return (
     <div className="mb-6 flex flex-col items-start w-full">
       <div className="flex space-x-6 border-b mb-4 w-full">
@@ -279,7 +279,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           );
         })}
       </div>
- 
+
       <div className="w-full">
         {selectedTab === 'Answer' && (
           <>
@@ -288,7 +288,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                 replace: (node) => {
                   if (node.type === 'tag') {
                     const el = node as Element;
- 
+
                     if (el.name === 'table') {
                       return renderTable(el.children as DOMNode[]);
                     }
@@ -316,7 +316,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         </div>
                       );
                     }
- 
+
                     if (el.name === 'code') {
                       const codeText = el.children?.[0]?.type === 'text' ? (el.children[0] as any).data : '';
                       return (
@@ -338,7 +338,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                         </div>
                       );
                     }
- 
+
                     if (el.name === 'p' && el.children?.[0]?.type === 'tag') {
                       const codeElement = el.children[0] as Element;
                       if (codeElement.name === 'code') {
@@ -393,7 +393,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             )}
           </>
         )}
- 
+
         {selectedTab === 'Sources' && (
           <div className="mt-4">
             {isSourcesLoading ? (
@@ -407,33 +407,33 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     </div>
   );
 };
- 
+
 // Function to fetch a single chat (reused from the example code)
 const fetchSingleChat = async (
   chatId: string,
   userId: string
 ): Promise<ChatHistoryResponse> => {
- 
+
   const response = await API.get(`/chat/chat/history?user_id=${userId}&chat_id=${chatId}`);
- 
+
   if (response.status !== 200) {
     throw new Error(`Failed to fetch chat: ${response.statusText}`);
   }
- 
+
   // Check if response.data is an array
   const data = response.data;
   if (!Array.isArray(data)) {
     console.error("Invalid response format:", data);
     throw new Error("Invalid response format from server");
   }
- 
+
   // Find the specific chat in the array
   const currentChat = data.find(chat => chat.chat_id === chatId);
   if (!currentChat) {
     console.error("Chat not found in response");
     throw new Error("Chat not found");
   }
- 
+
   // Return the chat in expected format
   return {
     chat_id: currentChat.chat_id,
@@ -441,16 +441,16 @@ const fetchSingleChat = async (
     messages: currentChat.messages || []
   };
 };
- 
+
 // TypingEffect component for animating text
 const TypingEffect = ({ htmlString }: { htmlString: string }) => {
   const [displayedText, setDisplayedText] = useState("");
- 
+
   useEffect(() => {
     let i = 0;
     const words = htmlString.split(" ");
     let currentText = "";
- 
+
     const interval = setInterval(() => {
       if (i < words.length) {
         currentText += (i === 0 ? "" : " ") + words[i];
@@ -460,10 +460,10 @@ const TypingEffect = ({ htmlString }: { htmlString: string }) => {
         clearInterval(interval);
       }
     }, 150);
- 
+
     return () => clearInterval(interval);
   }, [htmlString]);
- 
+
   return (
     <div
       className="p-5 text-black"
@@ -471,7 +471,7 @@ const TypingEffect = ({ htmlString }: { htmlString: string }) => {
     />
   );
 };
- 
+
 const ChatPage = () => {
   const { chat_id } = useParams<{ chat_id: string }>();
   const [messages, setMessages] = useState<ResponseData[]>([]);
@@ -481,7 +481,7 @@ const ChatPage = () => {
   const [initialQueryLoading, setInitialQueryLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
- 
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -490,7 +490,7 @@ const ChatPage = () => {
         notify("File size should not exceed 10MB", "error");
         return;
       }
-     
+      
       // Check file type
       const allowedTypes = [
         'application/pdf',
@@ -502,17 +502,17 @@ const ChatPage = () => {
         'image/gif',
         'image/bmp'
       ];
-     
+      
       if (!allowedTypes.includes(file.type)) {
         notify("Please upload a PDF, DOC, DOCX, or TXT file", "error");
         return;
       }
-     
+      
       setSelectedFile(file);
       setInput(""); // Clear any existing input
     }
   };
- 
+
   const clearSelectedFile = () => {
     setSelectedFile(null);
     if (formRef.current) {
@@ -528,10 +528,10 @@ const ChatPage = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [latestMessageId, setLatestMessageId] = useState<string | null>(null);
- 
+
   const latestResponseId = useRef<string | null>(null);
   const { notify } = useToast();
- 
+
   const handleStreamedChunk = (parsedData: ResponseData) => {
     setMessages(prev => {
       if (parsedData.response_mode === 'answer') {
@@ -556,7 +556,7 @@ const ChatPage = () => {
       }
     });
   };
- 
+  
   const handleSuggestionClick = (question: string) => {
     setInput(question);
     setTimeout(() => {
@@ -565,15 +565,15 @@ const ChatPage = () => {
       );
     }, 0);
   };
- 
+
   // Scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
- 
+
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
- 
+
   useLayoutEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -584,7 +584,7 @@ const ChatPage = () => {
       ta.style.height = '45px';
     }
   }, [input]);
- 
+
   // Fetch chat history when chat_id changes (new logic)
   useEffect(() => {
     if (!chat_id) return;
@@ -593,20 +593,20 @@ const ChatPage = () => {
     const fetchChatHistory = async () => {
       setLoading(true);
       setError(null);
- 
+
       try {
         if (!chat_id) {
           throw new Error("Chat ID is undefined.");
         }
- 
+
         const currentUserId = userId;
         if (!currentUserId) {
           throw new Error("User ID not found");
         }
         const chatResponse = await fetchSingleChat(chat_id, currentUserId);
- 
+
         const response = await fetchSingleChat(chat_id, currentUserId);
- 
+
         // Validate response structure
         if (!response || !response.messages || !Array.isArray(response.messages)) {
           console.error("Invalid chat history response:", response);
@@ -642,7 +642,7 @@ const ChatPage = () => {
               },
             ];
           });
- 
+
           setMessages(historyEntries);
         } catch (error) {
           console.error("Error processing chat history:", error);
@@ -661,14 +661,14 @@ const ChatPage = () => {
         }
       }
     };
- 
+
     if (chat_id) {
       fetchChatHistory();
     } else {
       notify("No chat ID found.", "error");
     }
   }, [chat_id]);
- 
+
   // Fetch initial data on mount (existing logic)
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -679,13 +679,13 @@ const ChatPage = () => {
         setInitialQueryLoading(false);
         return;
       }
- 
+
       const initialQuery = Cookies.get(`chat_${chat_id}_initialQuery`);
       if (!initialQuery) {
         setInitialQueryLoading(false);
         return;
       }
- 
+
       const userMessage: ResponseData = {
         response_mode: "user",
         question: initialQuery,
@@ -704,10 +704,10 @@ const ChatPage = () => {
         }
         return [...prev, userMessage];
       });
- 
+
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
- 
+
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/chat/response`, {
           method: "POST",
@@ -722,44 +722,44 @@ const ChatPage = () => {
           }),
           signal,
         });
- 
+
         Cookies.remove(`chat_${chat_id}_initialQuery`);
- 
+
         if (!response.body) {
           notify("Response body is empty", "error");
           setLoading(false);
           return;
         }
- 
+
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let accumulatedData = "";
- 
+
         while (true) {
           const { done, value } = await reader.read();
- 
+
           if (done) {
             setInitialQueryLoading(false);
             break;
           }
- 
+
           accumulatedData += decoder.decode(value, { stream: true });
           const lines = accumulatedData.split("\n").filter(l => l.trim());
           lines.forEach(line => {
             try {
               const parsedData = JSON.parse(line) as ResponseData;
- 
+
               if (parsedData.response_mode === "user") {
                 return;
               }
- 
+
               handleStreamedChunk(parsedData);
- 
+
             } catch (err) {
               console.error("Failed to parse chunk:", err);
             }
           });
- 
+
           accumulatedData = "";
         }
       } catch (error) {
@@ -771,12 +771,12 @@ const ChatPage = () => {
         }
       }
     };
- 
+
     if (!hasFetched.current && chat_id && userId && authToken && !initialQueryLoading) {
       hasFetched.current = true;
       fetchInitialData();
     }
- 
+
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -785,7 +785,7 @@ const ChatPage = () => {
       hasFetched.current = false;
     };
   }, [chat_id, userId, authToken]);
- 
+
   const LoadingDots = () => {
     return (
       <div className="flex space-x-1">
@@ -812,7 +812,7 @@ const ChatPage = () => {
       </div>
     );
   };
- 
+
   // Function to send a new message (existing logic)
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -820,22 +820,22 @@ const ChatPage = () => {
       notify("Please enter a question or attach a file", "error");
       return;
     }
- 
+
     const userQuery = input.trim();
     let imageBase64 = null; // Initialize imageBase64 here
-   
+    
     setInput("");
     setLoading(true);
     setError(null);
- 
+
     // Process file first if there is one
     try {
       let documentText = null;
-     
+      
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
-       
+        
         const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/document/extract`, {
           method: 'POST',
           headers: {
@@ -843,17 +843,17 @@ const ChatPage = () => {
           },
           body: formData,
         });
-       
+        
         if (!uploadResponse.ok) {
           throw new Error('Failed to process file');
         }
-       
+        
         const result = await uploadResponse.json();
         documentText = result.text;
         imageBase64 = result.image_base64; // Set imageBase64 from upload result
         clearSelectedFile();
       }
- 
+
       // Now create the user message with the imageBase64 if available
       const userMessage: ResponseData = {
         response_mode: "user",
@@ -863,10 +863,10 @@ const ChatPage = () => {
         image_base64: imageBase64,
       };
       setMessages((prev) => [...prev, userMessage]);
- 
+
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
- 
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/chat/response`, {
         method: "POST",
         headers: {
@@ -881,40 +881,40 @@ const ChatPage = () => {
         }),
         signal,
       });
- 
+
       if (!response.body) {
         notify("Response body is empty", "error");
         setLoading(false);
         return;
       }
- 
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedData = "";
- 
+
       while (true) {
         const { done, value } = await reader.read();
- 
+
         if (done) {
           break;
         }
- 
+
         accumulatedData += decoder.decode(value, { stream: true });
         const lines = accumulatedData.split("\n").filter(l => l.trim());
         lines.forEach(line => {
           try {
             const parsedData = JSON.parse(line) as ResponseData;
- 
+
             if (parsedData.response_mode === "user") {
               return;
             }
             handleStreamedChunk(parsedData);
- 
+
           } catch (err) {
             console.error("Failed to parse chunk:", err);
           }
         });
- 
+
         accumulatedData = "";
       }
     } catch (error) {
@@ -928,7 +928,7 @@ const ChatPage = () => {
       setLoading(false);
     }
   };
- 
+
   return (
     <div className="w-full bg-gray-50 text-black h-full flex flex-col justify-center items-center">
       {/* Chat Messages */}
@@ -953,7 +953,7 @@ const ChatPage = () => {
         )}
         <div ref={messagesEndRef} />
       </div>
- 
+
       {/* Input Form (Fixed at Bottom) */}
       <div className="flex justify-center pb-5 bg-gray-50 w-full">
         <form
@@ -973,17 +973,17 @@ const ChatPage = () => {
             htmlFor="file-upload"
             className="flex items-center px-2 py-1 rounded cursor-pointer hover:bg-gray-100"
           >
-            <svg
+            <svg 
               className="w-6 h-6 text-gray-500"
-              fill="none"
-              stroke="currentColor"
+              fill="none" 
+              stroke="currentColor" 
               viewBox="0 0 24 24"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" 
               />
             </svg>
             {selectedFile && (
@@ -992,7 +992,7 @@ const ChatPage = () => {
               </span>
             )}
           </label>
-         
+          
           <textarea
             ref={textareaRef}
             value={input}
@@ -1014,17 +1014,17 @@ const ChatPage = () => {
               className="p-1 text-gray-500 hover:text-gray-700"
               title="Remove file"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                stroke="currentColor" 
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M6 18L18 6M6 6l12 12" 
                 />
               </svg>
             </button>
@@ -1044,5 +1044,5 @@ const ChatPage = () => {
     </div>
   );
 };
- 
+
 export default ChatPage;
